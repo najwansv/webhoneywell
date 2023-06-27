@@ -18,6 +18,7 @@
 
   <!-- Include jQuery library -->
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <script>
       // Function to fetch data and update the content
@@ -363,295 +364,120 @@
   <script src="assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="assets/js/plugins/chartjs.min.js"></script>
   <script>
-      var ctx = document.getElementById("chart-line1").getContext("2d");
-        
-      var times = <?php echo json_encode($idTime); ?>;
-      var temps = <?php echo json_encode($temp); ?>;
-      var humid = <?php echo json_encode($humid); ?>;
+        var ctx = document.getElementById("chart-line1").getContext("2d");
+        var chart;
 
-      new Chart(ctx, {
-        type: "line",
-        data: {
-          labels: [times[0], times[1], times[2], times[3], times[4], times[5], times[6], times[7], times[8]],
-          datasets: [
-            {
-              label: "Celcius",
-              tension: 0,
-              borderWidth: 0,
-              pointRadius: 5,
-              pointBackgroundColor: "rgba(255, 255, 255, .8)",
-              pointBorderColor: "transparent",
-              borderColor: "rgba(255, 255, 255, .8)",
-              borderColor: "rgba(255, 255, 255, .8)",
-              borderWidth: 4,
-              backgroundColor: "transparent",
-              fill: true,
-              data: [temps[0], temps[1], temps[2], temps[3], temps[4], temps[5], temps[6], temps[7], temps[8]],
-              maxBarThickness: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          interaction: {
-            intersect: false,
-            mode: "index",
-          },
-          scales: {
-            y: {
-              grid: {
-                drawBorder: false,
-                display: true,
-                drawOnChartArea: true,
-                drawTicks: false,
-                borderDash: [5, 5],
-                color: "rgba(255, 255, 255, .2)",
-              },
-              ticks: {
-                display: true,
-                color: "#f8f9fa",
-                padding: 10,
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-            x: {
-              grid: {
-                drawBorder: false,
-                display: false,
-                drawOnChartArea: false,
-                drawTicks: false,
-                borderDash: [5, 5],
-              },
-              ticks: {
-                display: true,
-                color: "#f8f9fa",
-                padding: 10,
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-          },
-        },
-      });
+        function fetchData() {
+            fetch('fetchDataChart.php')
+                .then(response => response.json())
+                .then(data => {
+                  var times = data.times;
+                  var temps = data.temps;
 
-      var ctx2 = document.getElementById("chart-line2").getContext("2d");
+                  if (times.length > 6) {
+                    times = times.slice(-6);
+                    temps = temps.slice(-6);
+                  }
+                // Prepare the chart data
+                var chartData = times.map((time, index) => ({ x: time, y: temps[index] }));
 
-      new Chart(ctx2, {
-        type: "line",
-        data: {
-          labels: [times[0], times[1], times[2], times[3], times[4], times[5], times[6], times[7], times[8]],
-          datasets: [
-            {
-              label: "Humidity (Percentage)",
-              tension: 0,
-              borderWidth: 0,
-              pointRadius: 5,
-              pointBackgroundColor: "rgba(255, 255, 255, .8)",
-              pointBorderColor: "transparent",
-              borderColor: "rgba(255, 255, 255, .8)",
-              borderColor: "rgba(255, 255, 255, .8)",
-              borderWidth: 4,
-              backgroundColor: "transparent",
-              fill: true,
-              data: [humid[0], humid[1], humid[2], humid[3], humid[4], humid[5], humid[6], humid[7], humid[8]],
-              maxBarThickness: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: false,
-            },
-          },
-          interaction: {
-            intersect: false,
-            mode: "index",
-          },
-          scales: {
-            y: {
-              grid: {
-                drawBorder: false,
-                display: true,
-                drawOnChartArea: true,
-                drawTicks: false,
-                borderDash: [5, 5],
-                color: "rgba(255, 255, 255, .2)",
-              },
-              ticks: {
-                display: true,
-                color: "#f8f9fa",
-                padding: 10,
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-            x: {
-              grid: {
-                drawBorder: false,
-                display: false,
-                drawOnChartArea: false,
-                drawTicks: false,
-                borderDash: [5, 5],
-              },
-              ticks: {
-                display: true,
-                color: "#f8f9fa",
-                padding: 10,
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-          },
-        },
-      });
+                if (chart) {
+                  // Update existing chart data
+                  chart.data.datasets[0].data = chartData;
+                  chart.update();
+                  } else {
+                        // Create new chart
+                        chart = new Chart(ctx, {
+                            type: "line",
+                            data: {
+                                datasets: [{
+                                    label: "Celcius",
+                                    data: chartData,
+                                    tension: 0,
+                                    borderWidth: 0,
+                                    pointRadius: 5,
+                                    pointBackgroundColor: "rgba(255, 255, 255, .8)",
+                                    pointBorderColor: "transparent",
+                                    borderColor: "rgba(255, 255, 255, .8)",
+                                    borderWidth: 4,
+                                    backgroundColor: "transparent",
+                                    fill: true,
+                                    maxBarThickness: 6
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                interaction: {
+                                    intersect: false,
+                                    mode: "index"
+                                },
+                                scales: {
+                                    y: {
+                                        grid: {
+                                            drawBorder: false,
+                                            display: true,
+                                            drawOnChartArea: true,
+                                            drawTicks: false,
+                                            borderDash: [5, 5],
+                                            color: "rgba(255, 255, 255, .2)"
+                                        },
+                                        ticks: {
+                                            display: true,
+                                            color: "#f8f9fa",
+                                            padding: 10,
+                                            font: {
+                                                size: 14,
+                                                weight: 300,
+                                                family: "Roboto",
+                                                style: "normal",
+                                                lineHeight: 2
+                                            }
+                                        }
+                                    },
+                                    x: {
+                                        grid: {
+                                            drawBorder: false,
+                                            display: false,
+                                            drawOnChartArea: false,
+                                            drawTicks: false,
+                                            borderDash: [5, 5]
+                                        },
+                                        ticks: {
+                                            display: true,
+                                            color: "#f8f9fa",
+                                            padding: 10,
+                                            font: {
+                                                size: 14,
+                                                weight: 300,
+                                                family: "Roboto",
+                                                style: "normal",
+                                                lineHeight: 2
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        }
 
-      var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
+        // Fetch data initially
+        fetchData();
 
-      new Chart(ctx3, {
-        type: "line",
-        data: {
-          labels: [times[0], times[1], times[2], times[3], times[4], times[5], times[6], times[7], times[8]],
-          datasets: [
-            {
-              label: "Temperature (Celcius)",
-              tension: 0,
-              borderWidth: 0,
-              pointRadius: 5,
-              pointBackgroundColor: "#DF2869",
-              pointBorderColor: "transparent",
-              borderColor: "#DF2869",
-              borderWidth: 4,
-              backgroundColor: "transparent",
-              fill: true,
-              data: [temps[0], temps[1], temps[2], temps[3], temps[4], temps[5], temps[6], temps[7], temps[8]],
-              maxBarThickness: 6,
-            },
-            {
-              label: "Humidity (percentage)",
-              tension: 0,
-              borderWidth: 0,
-              pointRadius: 5,
-              pointBackgroundColor: "#4BA64F",
-              pointBorderColor: "transparent",
-              borderColor: "#4BA64F",
-              borderWidth: 4,
-              backgroundColor: "transparent",
-              fill: true,
-              data: [humid[0], humid[1], humid[2], humid[3], humid[4], humid[5], humid[6], humid[7], humid[8]],
-              maxBarThickness: 6,
-            },
-          ],
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: {
-            legend: {
-              display: true, // Set to true if you want to display the legend
-              position: "bottom",
-              labels: {
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-                boxWidth: 10,
-                color: "#f8f9fa",
-              },
-            },
-          },
-          interaction: {
-            intersect: false,
-            mode: "index",
-          },
-          scales: {
-            y: {
-              grid: {
-                drawBorder: false,
-                display: true,
-                drawOnChartArea: true,
-                drawTicks: false,
-                borderDash: [5, 5],
-                color: "rgba(255, 255, 255, .2)",
-              },
-              ticks: {
-                display: true,
-                color: "#f8f9fa",
-                padding: 10,
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-            x: {
-              grid: {
-                drawBorder: false,
-                display: false,
-                drawOnChartArea: false,
-                drawTicks: false,
-                borderDash: [5, 5],
-              },
-              ticks: {
-                display: true,
-                color: "#f8f9fa",
-                padding: 10,
-                font: {
-                  size: 14,
-                  weight: 300,
-                  family: "Roboto",
-                  style: "normal",
-                  lineHeight: 2,
-                },
-              },
-            },
-          },
-        },
-      });
+        // Fetch data every 5 seconds
+        setInterval(fetchData, 5000);
+    </script>
 
-      var win = navigator.platform.indexOf("Win") > -1;
-      if (win && document.querySelector("#sidenav-scrollbar")) {
-        var options = {
-          damping: "0.5",
-        };
-        Scrollbar.init(document.querySelector("#sidenav-scrollbar"), options);
-      }
-  </script>
   
   <!-- Github buttons -->
   <script async defer src="https://buttons.github.io/buttons.js"></script>

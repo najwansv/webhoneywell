@@ -43,24 +43,6 @@
       setInterval(fetchData, 1000);
   </script>
 
-  <?php 
-    include("connectDB.php");
-    $result = mysqli_query($connectDB, "SELECT * FROM labroom WHERE TIME_FORMAT(idTime, '%H:%i') IN ('06:00', '09:00', '12:00', '15:00', '17:00', '19:00', '21:00', '24:00', '13:42')");
-    
-    // prepare data for chart
-    $idTime = [];
-    $temp = [];
-    $humid = [];
-
-    if($result->num_rows > 0){
-      while($row = $result->fetch_assoc()){
-        array_push($idTime, $row['idTime']);
-        array_push($temp, $row['Temp']);
-        array_push($humid, $row['Humid']);
-      }
-    }
-  ?>
-
 
   <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
   <!-- Material Icons -->
@@ -364,15 +346,11 @@
   <script src="assets/js/plugins/chartjs.min.js"></script>
   <script>
       var ctx = document.getElementById("chart-line1").getContext("2d");
-        
-      var times = <?php echo json_encode($idTime); ?>;
-      var temps = <?php echo json_encode($temp); ?>;
-      var humid = <?php echo json_encode($humid); ?>;
 
-      new Chart(ctx, {
+      var chart = new Chart(ctx, {
         type: "line",
         data: {
-          labels: [times[0], times[1], times[2], times[3], times[4], times[5], times[6], times[7], times[8]],
+          labesl:[],
           datasets: [
             {
               label: "Celcius",
@@ -386,7 +364,7 @@
               borderWidth: 4,
               backgroundColor: "transparent",
               fill: true,
-              data: [temps[0], temps[1], temps[2], temps[3], temps[4], temps[5], temps[6], temps[7], temps[8]],
+              data: [],
               maxBarThickness: 6,
             },
           ],
@@ -453,10 +431,10 @@
 
       var ctx2 = document.getElementById("chart-line2").getContext("2d");
 
-      new Chart(ctx2, {
+      var chart2 = new Chart(ctx2, {
         type: "line",
         data: {
-          labels: [times[0], times[1], times[2], times[3], times[4], times[5], times[6], times[7], times[8]],
+          labels: [],
           datasets: [
             {
               label: "Humidity (Percentage)",
@@ -470,7 +448,7 @@
               borderWidth: 4,
               backgroundColor: "transparent",
               fill: true,
-              data: [humid[0], humid[1], humid[2], humid[3], humid[4], humid[5], humid[6], humid[7], humid[8]],
+              data: [],
               maxBarThickness: 6,
             },
           ],
@@ -537,10 +515,10 @@
 
       var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
 
-      new Chart(ctx3, {
+      var chart3 = new Chart(ctx3, {
         type: "line",
         data: {
-          labels: [times[0], times[1], times[2], times[3], times[4], times[5], times[6], times[7], times[8]],
+          labels: [],
           datasets: [
             {
               label: "Temperature (Celcius)",
@@ -553,7 +531,7 @@
               borderWidth: 4,
               backgroundColor: "transparent",
               fill: true,
-              data: [temps[0], temps[1], temps[2], temps[3], temps[4], temps[5], temps[6], temps[7], temps[8]],
+              data: [],
               maxBarThickness: 6,
             },
             {
@@ -567,7 +545,7 @@
               borderWidth: 4,
               backgroundColor: "transparent",
               fill: true,
-              data: [humid[0], humid[1], humid[2], humid[3], humid[4], humid[5], humid[6], humid[7], humid[8]],
+              data: [],
               maxBarThickness: 6,
             },
           ],
@@ -643,6 +621,44 @@
           },
         },
       });
+
+      function updateChart() {
+        // Fetch new data from the server using AJAX
+        // You can use libraries like jQuery or fetch API for AJAX requests
+        // Example using jQuery:
+        $.ajax({
+          url: "fetchDataChart.php", // Replace with the URL that provides updated data
+          dataType: "json",
+          success: function(datanya) {
+            var times = datanya.time;
+            var temps = datanya.temp;
+            var humids = datanya.humid;
+
+            // Update the chart data
+            chart.data.labels = times;
+            chart.data.datasets[0].data = temps;
+
+            chart2.data.labels = times;
+            chart2.data.datasets[0].data = humids;
+
+            chart3.data.labels = times;
+            chart3.data.datasets[0].data = temps;
+            chart3.data.datasets[1].data = humids;
+
+            console.log(datanya);
+
+            // Update the chart
+            chart.update();
+            chart2.update();
+            chart3.update();
+          },
+          error: function(xhr, status, error) {
+            console.log("Error fetching data:", error);
+          }
+        });
+      }
+      
+      setInterval(updateChart, 1000);
 
       var win = navigator.platform.indexOf("Win") > -1;
       if (win && document.querySelector("#sidenav-scrollbar")) {

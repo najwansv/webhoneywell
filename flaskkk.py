@@ -1,27 +1,28 @@
+# memasukkan library flask, mariadb, dan time
 from flask import Flask, request
-import mariadb
+import mariadb 
 import time
 
 app = Flask(__name__)
 
-cnx = mariadb.connect(
-    host="localhost",
-    user="root",
-    password="",
-    database="honeywelldb"
+cnx = mariadb.connect( #membuat koneksi ke database
+    host="localhost", #host database
+    user="root", #username database
+    password="", #password database
+    database="honeywelldb" #nama database
 )
 
-@app.route('/tempHumidPOST', methods=['POST'])
+@app.route('/tempHumidPOST', methods=['POST']) #membuat route untuk menerima data dari sensor
 def receive_data():
     data = request.get_json()
-    temp_C = data['temp_C']
-    humidity = data['humidity']
+    temp_C = data['temp_C'] #mengambil data temperatur dari sensor
+    humidity = data['humidity'] #mengambil data kelembaban dari sensor
 
     try:
         with cnx.cursor() as cursor:
-            sql = ("INSERT INTO labroom (Temp, Humid) VALUES (?, ?)")
+            sql = ("INSERT INTO labroom (Temp, Humid) VALUES (?, ?)") #memasukkan data ke database menggunakan query
             cursor.execute(sql, (temp_C, humidity))
-            cnx.commit()
+            cnx.commit() #mengeksekusi query
 
             if cnx.is_connected():
                 print("Connected to MariaDB server")
@@ -30,7 +31,7 @@ def receive_data():
 
             print(f"Temperature: {temp_C}, Humidity: {humidity}")
 
-            return "Data received"
+            return "Data received" 
     except:
         return "Error"
 

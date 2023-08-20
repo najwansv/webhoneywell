@@ -20,15 +20,15 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script>
-      // Function to fetch data and update the content
+      // fungsi untuk mengambil data dan memperbarui konten
       function fetchData() {
           $.ajax({
-              url: "fetchDataRealTime.php",
-              dataType: "json",
+              url: "fetchDataRealTime.php", // memanggil file fetchDataRealTime.php
+              dataType: "json", // tipe data yang diambil
               success: function(data) {
-                  // Update the content with the latest data
-                  $("#data").text(data.temp + "°C");
-                  $("#data2").text(data.humid + "%");
+                  // update konten dengan data terbaru
+                  $("#data").text(data.temp + "°C"); // memperbarui konten suhu
+                  $("#data2").text(data.humid + "%"); // memperbarui konten kelembaban
               },
               error: function(xhr, status, error) {
                   console.log("Error: " + error);
@@ -36,11 +36,27 @@
           });
       }
 
-      // Fetch data initially
-      fetchData();
+      function statData(){
+      $.ajax({
+          url: "differentiator.php",
+          dataType: "json",
+          success: function(data) {
+            $("#tempStat").text(data.tempStat + "%");
+            
+            $("#humidStat").text(data.humidStat + "%");
+            
+          },
+          error: function(xhr, status, error) {
+            console.log("Error: " + error);
+          }
+        });
+      }
 
-      // Periodically fetch data every 5 seconds (adjust as needed)
+      // Memanggil fungsi fetchData() setiap 1 detik (1000 ms)
       setInterval(fetchData, 1000);
+      setInterval(statData, 1000);
+
+
   </script>
 
 
@@ -65,7 +81,7 @@
     <div class="collapse navbar-collapse  w-auto " id="sidenav-collapse-main">
       <ul class="navbar-nav">
         <li class="nav-item">
-          <a class="nav-link text-white active bg-gradient-primary" href="pages/dashboard.html">
+          <a class="nav-link text-white active bg-gradient-primary">
             <div class="text-white text-center me-2 d-flex align-items-center justify-content-center">
               <i class="material-icons opacity-10">dashboard</i>
             </div>
@@ -113,7 +129,8 @@
         <div class="col-xl col-sm-6 mb-xl-0 mb-4">
           <div class="card">
             <div class="card-header p-3 pt-2">
-              <div class="icon icon-lg icon-shape bg-gradient-primary shadow-primary text-center border-radius-xl mt-n4 position-absolute">
+              <div class="icon icon-lg icon-shape bg-gradient-primary shadow-primary 
+              text-center border-radius-xl mt-n4 position-absolute">
                 <i class="material-icons opacity-10">device_thermostat</i>
               </div>
               <div class="text-end pt-1">
@@ -123,7 +140,7 @@
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">+55% </span>than last hour</p>
+              <p class="mb-0"><span class="text-success text-sm font-weight-bolder" id="tempStat"> </span>than last hour</p>
             </div>
           </div>
         </div>
@@ -141,49 +158,13 @@
             </div>
             <hr class="dark horizontal my-0">
             <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">+3% </span>than last hour</p>
+              <p class="mb-0"><span class="text-success text-sm font-weight-bolder" id="humidStat"> </span>than last hour</p>
             </div>
           </div>
         </div>
-
-        <!-- <div class="col-xl-3 col-sm-6 mb-xl-0 mb-4">
-          <div class="card">
-            <div class="card-header p-3 pt-2">
-              <div class="icon icon-lg icon-shape bg-gradient-success shadow-success text-center border-radius-xl mt-n4 position-absolute">
-                <i class="material-icons opacity-10">person</i>
-              </div>
-              <div class="text-end pt-1">
-                <p class="text-sm mb-0 text-capitalize">New Clients</p>
-                <h4 class="mb-0">3,462</h4>
-              </div>
-            </div>
-            <hr class="dark horizontal my-0">
-            <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-danger text-sm font-weight-bolder">-2%</span> than yesterday</p>
-            </div>
-          </div>
-        </div> -->
-
-        <!-- <div class="col-xl-3 col-sm-6">
-          <div class="card">
-            <div class="card-header p-3 pt-2">
-              <div class="icon icon-lg icon-shape bg-gradient-info shadow-info text-center border-radius-xl mt-n4 position-absolute">
-                <i class="material-icons opacity-10">weekend</i>
-              </div>
-              <div class="text-end pt-1">
-                <p class="text-sm mb-0 text-capitalize">Sales</p>
-                <h4 class="mb-0">$103,430</h4>
-              </div>
-            </div>
-            <hr class="dark horizontal my-0">
-            <div class="card-footer p-3">
-              <p class="mb-0"><span class="text-success text-sm font-weight-bolder">+5% </span>than yesterday</p>
-            </div>
-          </div>
-        </div>
-      </div> -->
 
       <!-- charts -->
+
       <div class="row mt-4">
         <div class="col-lg col-md-6 mt-4 mb-4">
           <div class="card z-index-2 ">
@@ -333,15 +314,16 @@
   <script src="assets/js/plugins/smooth-scrollbar.min.js"></script>
   <script src="assets/js/plugins/chartjs.min.js"></script>
   <script>
+      // mengambil id element
       var ctx = document.getElementById("chart-line1").getContext("2d");
-
+      // membuat chart dengan library ChartJS
       var chart = new Chart(ctx, {
         type: "line",
         data: {
           labesl:[],
           datasets: [
             {
-              label: "Celcius",
+              label: "Celcius", // label untuk data temperatur
               tension: 0,
               borderWidth: 0,
               pointRadius: 5,
@@ -352,7 +334,7 @@
               borderWidth: 4,
               backgroundColor: "transparent",
               fill: true,
-              data: [],
+              data: [], // data temperatur
               maxBarThickness: 6,
             },
           ],
@@ -416,16 +398,16 @@
           },
         },
       });
-
+      // mengambil id element
       var ctx2 = document.getElementById("chart-line2").getContext("2d");
-
+      // membuat chart dengan library ChartJS
       var chart2 = new Chart(ctx2, {
         type: "line",
         data: {
           labels: [],
           datasets: [
             {
-              label: "Humidity (Percentage)",
+              label: "Humidity (Percentage)",// label untuk data kelembapan
               tension: 0,
               borderWidth: 0,
               pointRadius: 5,
@@ -436,7 +418,7 @@
               borderWidth: 4,
               backgroundColor: "transparent",
               fill: true,
-              data: [],
+              data: [], // data kelembapan
               maxBarThickness: 6,
             },
           ],
@@ -500,16 +482,16 @@
           },
         },
       });
-
+      // mengambil id element
       var ctx3 = document.getElementById("chart-line-tasks").getContext("2d");
-
+      // membuat chart dengan library ChartJS
       var chart3 = new Chart(ctx3, {
         type: "line",
         data: {
           labels: [],
           datasets: [
             {
-              label: "Temperature (Celcius)",
+              label: "Temperature (Celcius)", // label untuk data temperatur
               tension: 0,
               borderWidth: 0,
               pointRadius: 5,
@@ -523,7 +505,7 @@
               maxBarThickness: 6,
             },
             {
-              label: "Humidity (percentage)",
+              label: "Humidity (percentage)", // label untuk data kelembapan
               tension: 0,
               borderWidth: 0,
               pointRadius: 5,
@@ -543,7 +525,7 @@
           maintainAspectRatio: false,
           plugins: {
             legend: {
-              display: true, // Set to true if you want to display the legend
+              display: true,
               position: "bottom",
               labels: {
                 font: {
@@ -611,18 +593,16 @@
       });
 
       function updateChart() {
-        // Fetch new data from the server using AJAX
-        // You can use libraries like jQuery or fetch API for AJAX requests
-        // Example using jQuery:
+        // fetch data dari server menggunakan AJAX
         $.ajax({
-          url: "fetchDataChart.php", // Replace with the URL that provides updated data
+          url: "fetchDataChart.php", // mengambil data dari fetchDataChart.php
           dataType: "json",
           success: function(datanya) {
-            var times = datanya.time;
-            var temps = datanya.temp;
-            var humids = datanya.humid;
+            var times = datanya.time; // memasukkan data waktu ke dalam array
+            var temps = datanya.temp; // memasukkan data temperatur ke dalam array
+            var humids = datanya.humid; // memasukkan data kelembaban ke dalam array
 
-            // Update the chart data
+            // update chart dengan data terbaru
             chart.data.labels = times;
             chart.data.datasets[0].data = temps;
 
@@ -633,9 +613,7 @@
             chart3.data.datasets[0].data = temps;
             chart3.data.datasets[1].data = humids;
 
-            console.log(datanya);
-
-            // Update the chart
+            // Update chart
             chart.update();
             chart2.update();
             chart3.update();
@@ -646,7 +624,7 @@
         });
       }
       
-      setInterval(updateChart, 1000);
+      setInterval(updateChart, 1000); // memanggil fungsi updateChart() setiap 1 detik (1000 ms)
 
       var win = navigator.platform.indexOf("Win") > -1;
       if (win && document.querySelector("#sidenav-scrollbar")) {

@@ -1,7 +1,7 @@
 <?php
 include("connectDB.php"); // koneksi ke database
 // mengambil data sql satu jam yang lalu
-$result1 = mysqli_query($connectDB, "SELECT * FROM labroom WHERE idTime <= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 HOUR), '%H:%i') ORDER BY idTime DESC LIMIT 1");
+$result1 = mysqli_query($connectDB, "SELECT * FROM labroom WHERE idTime >= DATE_FORMAT(DATE_SUB(NOW(), INTERVAL 1 HOUR), '%H:%i') ORDER BY idTime DESC LIMIT 1");
 // mengambil data terbaru
 $result2 = mysqli_query($connectDB, "SELECT * FROM labroom ORDER BY id DESC LIMIT 1");
 
@@ -39,8 +39,8 @@ function calculatePercentageDifference($number1, $number2) {
 }
 
 // Calculate the percentage difference between the two numbers
-$percentageTemp = calculatePercentageDifference($temp1, $temp2);
-$percentageHumid = calculatePercentageDifference($humid1, $humid2);
+$percentageTemp = calculatePercentageDifference($temp1,$temp2);
+$percentageHumid = calculatePercentageDifference($humid1,$humid2);
 
 $data = array("tempStat" => $percentageTemp, "humidStat" => $percentageHumid); // memasukkan data ke dalam array
 
